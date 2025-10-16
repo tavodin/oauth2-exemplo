@@ -126,7 +126,28 @@ public class SecurityConfig {
                 .scope(OidcScopes.EMAIL)
                 .build();
 
-        return new InMemoryRegisteredClientRepository(registeredClient);
+        RegisteredClient spaClient = RegisteredClient
+                .withId(UUID.randomUUID().toString())
+                .clientId("my-client-spa")
+                .clientSecret(encoder().encode("my-secret-spa"))
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                .tokenSettings(TokenSettings.builder()
+                        .accessTokenTimeToLive(Duration.ofMinutes(30))
+                        .refreshTokenTimeToLive(Duration.ofDays(7))
+                        .reuseRefreshTokens(true)
+                        .idTokenSignatureAlgorithm(SignatureAlgorithm.RS256)
+                        .build())
+                .redirectUri("http://localhost:4200/callback")
+                .postLogoutRedirectUri("http://localhost:4200")
+                .scope(OidcScopes.OPENID)
+                .scope(OidcScopes.PROFILE)
+                .scope(OidcScopes.EMAIL)
+                .build();
+
+        return new InMemoryRegisteredClientRepository(registeredClient, spaClient);
     }
 
     @Bean
